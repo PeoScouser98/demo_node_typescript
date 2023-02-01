@@ -1,11 +1,26 @@
 import { Request, Response } from "express";
 import * as TodoServices from "../services/todo.service";
 import createHttpErrors, { HttpError } from "http-errors";
+import TodoModel from "../models/todo.models";
+export const list = async (req: Request, res: Response) => {
+	try {
+		const todoBuckets = await TodoServices.getAllTodoBuckets();
 
+		if (!todoBuckets) throw createHttpErrors.NotFound("Cannot find any todos !");
+		return res.status(200).json(todoBuckets);
+		// handle logic ...
+	} catch (error) {
+		const err = error as HttpError;
+		console.log(err.message);
+		return res.status(404).json({
+			status: err.status,
+			message: err.message,
+		});
+	}
+};
 export const listByPage = async (req: Request, res: Response) => {
 	try {
-		const pageQuery = +!req.query.page || 1;
-		const todos = await TodoServices.getTodoBucketByPage(pageQuery as number);
+		const todos = await TodoServices.getTodoBucketByPage(+!req.params.page as number);
 		if (!todos) throw createHttpErrors.NotFound("Cannot find todo");
 		return res.status(200).json(todos);
 	} catch (error) {

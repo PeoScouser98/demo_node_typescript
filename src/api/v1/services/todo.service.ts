@@ -5,10 +5,11 @@ import TodoModel from "../models/todo.models";
 // list all todo buckets
 export const getAllTodoBuckets = async () => {
 	try {
-		const totalPage = await TodoModel.count();
-		const buckets = await TodoModel.find().exec();
-		return { totalPage, buckets };
+		const allBuckets = await TodoModel.find().sort({ count: 1 }).exec();
+		const totalPage = await TodoModel.count({ count: { $gt: 0 } }).exec();
+		return { allBuckets, totalPage };
 	} catch (error) {
+		console.log(error);
 		return error as MongooseError;
 	}
 };
@@ -44,7 +45,7 @@ export const insertIntoTodoBucket = async (todo: Todo) => {
 				upsert: true,
 				new: true,
 			},
-		);
+		).exec();
 	} catch (error) {
 		return error as MongooseError;
 	}
@@ -81,11 +82,8 @@ export const deleteTodoBucket = async (id: number) => {
 			{
 				new: true,
 			},
-		)) as unknown as TodoBucket;
-		// 2. if page has no todo -> delete bucket
-		if (updatedTodoBucket.count === 0) {
-			await TodoModel.findOneAndDelete({ count: 0 });
-		}
+		).exec()) as unknown as TodoBucket;
+
 		return updatedTodoBucket;
 		// handle logic ...
 	} catch (error) {

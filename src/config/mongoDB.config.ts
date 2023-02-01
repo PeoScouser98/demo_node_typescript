@@ -1,5 +1,5 @@
 import "dotenv/config";
-import mongoose from "mongoose";
+import mongoose, { MongooseError } from "mongoose";
 
 const connectMongoDB = async () => {
 	try {
@@ -13,8 +13,9 @@ const connectMongoDB = async () => {
 		});
 		if (!data) throw new Error("[ERROR] Failed to connect database!");
 		console.log("[SUCCESS] Connected to database!");
-	} catch (error: any) {
-		console.log(error.message as string);
+	} catch (error) {
+		const mongodbError = error as MongooseError;
+		console.log(mongodbError.message);
 	}
 };
 
