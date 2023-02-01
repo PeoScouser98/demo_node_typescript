@@ -3,11 +3,10 @@ import { Todo, TodoBucket } from "../interfaces";
 import TodoModel from "../models/todo.models";
 
 // list all todo buckets
-export const getAllTodoBuckets = async () => {
+export const getTotalPages = async () => {
 	try {
-		const allBuckets = await TodoModel.find().sort({ count: 1 }).exec();
 		const totalPage = await TodoModel.count({ count: { $gt: 0 } }).exec();
-		return { allBuckets, totalPage };
+		return totalPage;
 	} catch (error) {
 		console.log(error);
 		return error as MongooseError;
@@ -52,11 +51,11 @@ export const insertIntoTodoBucket = async (todo: Todo) => {
 };
 
 // update todo
-export const updateTodoBucket = async (id: number, payload: Partial<Todo>) => {
+export const updateTodoBucket = async (id: string, payload: Partial<Todo>) => {
 	try {
 		const updatedTodoBucket = await TodoModel.findOneAndUpdate(
-			{ "todos.taskId": id },
-			{ $set: { "todos.$": payload } },
+			{ "todos._id": id },
+			{ $set: { "todos.$": { _id: id, ...payload } } },
 			{ new: true },
 		).exec();
 
@@ -69,14 +68,14 @@ export const updateTodoBucket = async (id: number, payload: Partial<Todo>) => {
 };
 
 // delete todo
-export const deleteTodoBucket = async (id: number) => {
+export const deleteTodoBucket = async (id: string) => {
 	try {
 		const totalPage = await TodoModel.count(); // get total page
 		// 1. remove todo from bucket
 		const updatedTodoBucket = (await TodoModel.findOneAndUpdate(
-			{ todos: { $elemMatch: { taskId: id } } },
+			{ todos: { $elemMatch: { _id: id } } },
 			{
-				$pull: { todos: { taskId: id } },
+				$pull: { todos: { _id: id } },
 				$inc: { count: -1 },
 			},
 			{

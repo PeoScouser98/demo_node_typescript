@@ -12,10 +12,6 @@ const todoSchema = new Schema(
 		},
 		todos: [
 			{
-				taskId: {
-					type: Number,
-					default: new Date().getTime(),
-				},
 				task: {
 					type: String,
 					trim: true,

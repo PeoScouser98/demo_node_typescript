@@ -1,13 +1,12 @@
 import { Request, Response } from "express";
-import * as TodoServices from "../services/todo.service";
 import createHttpErrors, { HttpError } from "http-errors";
-import TodoModel from "../models/todo.models";
-export const list = async (req: Request, res: Response) => {
-	try {
-		const todoBuckets = await TodoServices.getAllTodoBuckets();
+import * as TodoServices from "../services/todo.service";
 
-		if (!todoBuckets) throw createHttpErrors.NotFound("Cannot find any todos !");
-		return res.status(200).json(todoBuckets);
+export const getTotalPages = async (req: Request, res: Response) => {
+	try {
+		const allPages = await TodoServices.getTotalPages();
+		if (!allPages) throw createHttpErrors.NotFound("Cannot find any pages !");
+		return res.status(200).json({ total: allPages });
 		// handle logic ...
 	} catch (error) {
 		const err = error as HttpError;
@@ -52,7 +51,7 @@ export const create = async (req: Request, res: Response) => {
 export const update = async (req: Request, res: Response) => {
 	try {
 		if (!req.body) throw createHttpErrors.BadRequest("Todo must be provided!");
-		const updatedTodo = await TodoServices.updateTodoBucket(+req.params.taskId, req.body);
+		const updatedTodo = await TodoServices.updateTodoBucket(req.params.taskId, req.body);
 		if (!updatedTodo) throw createHttpErrors.NotFound("Cannot find todo to update");
 		return res.status(201).json(updatedTodo);
 	} catch (error) {
@@ -66,7 +65,7 @@ export const update = async (req: Request, res: Response) => {
 
 export const remove = async (req: Request, res: Response) => {
 	try {
-		const afterRemoved = await TodoServices.deleteTodoBucket(+req.params.taskId);
+		const afterRemoved = await TodoServices.deleteTodoBucket(req.params.taskId);
 		return res.status(200).json(afterRemoved);
 	} catch (error) {
 		const err = error as HttpError;
