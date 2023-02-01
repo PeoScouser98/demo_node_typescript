@@ -11,15 +11,11 @@ app.use(cors());
 app.use(morgan("tiny"));
 app.use(express.json());
 
-app.get("/", async (req, res) => {
-	try {
-		return res.status(200).json({
-			status: 200,
-			message: "Server now is running!",
-		});
-	} catch (error) {
-		return res.json({});
-	}
+app.get("/", (req, res) => {
+	return res.status(200).json({
+		status: 200,
+		message: "Server now is running!",
+	});
 });
 
 app.use("/v1/api", TodoRouter);
